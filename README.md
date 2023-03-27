@@ -55,14 +55,13 @@ Tested on a Ryzen 7 5800X w/ 32 GB RAM on Arch Linux(`linux` kernel).
 Keep in mind that UnpackUnboxed doesn't support `s`, `c`, `f` and `d`, and therefore those are not used here.
 * class SmallDummy: `>L<lI4>i3>BI` - 6 fields: ulong, long, (uint) ulong, (int) ulong, byte, (uint) ulong
 * class LargeDummy: `>L<lI4>i3>BI<L>lI4<i3<BI` - 12 fields: ulong, long, (uint) ulong, (int) ulong, byte, (uint) ulong, ulong, long, (uint) ulong, (int) ulong, byte, (uint) ulong
-```cs
+
 |             Method |     Mean |   Error |  StdDev |
-|------------------- |---------:|--------:|--------:|
+|------------------- |----------|---------|---------|
 |        UnpackSmall | 150.8 ns | 2.83 ns | 2.50 ns |
 | UnpackSmallUnboxed | 104.3 ns | 1.97 ns | 1.94 ns |
 |        UnpackLarge | 276.9 ns | 3.88 ns | 3.63 ns |
 | UnpackLargeUnboxed | 191.7 ns | 1.54 ns | 1.28 ns |
-```
 
 ## Big Endian
 Big Endian is fully supported *when packing and unpacking*, thus using the `>` flag is fully supported and will work; **but** options `i/I/s/c[n]` **will not work** correctly under a Big Endian memory layout (e.g. under Solaris).
