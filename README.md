@@ -13,7 +13,7 @@ print(string.pack(">b", 254)); -- input:1: bad argument #2 to 'pack' (integer ov
 * LuaPack does not and will most likely never support the `!` and `X` options.
 * LuaPack does not support `j`, `J`, `n` and `z` options **yet**.
 * LuaPack allows you to use byte counts higher than 16 in `i/I/s/c[n]` options, unlike Lua.
-* The Stream overload of LuaPack.Unpack will NOT fail if the stream ends prematurely.
+* All overloads of LuaPack.Unpack will NOT fail if the data feed ends prematurely.
 
 ## Usage
 Use LuaPack.Pack & LuaPack.PackBytes just like you would use string.pack in Lua. For this piece of code:
