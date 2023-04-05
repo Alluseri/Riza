@@ -8,6 +8,9 @@ using System.Text;
 
 namespace Alluseri.Riza;
 
+// TODO: Why not just use `partial`, bruh?
+
+/// <summary>The core component of Riza.</summary>
 public static class LuaPack {
 	#region Writing
 	[MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -65,11 +68,13 @@ public static class LuaPack {
 			if (Integral < 256) {
 				Span<byte> StrSpan = stackalloc byte[Integral];
 				StrSpan.Clear();
-				Encoding.UTF8.GetBytes((string) Argument, StrSpan);
+				if (Encoding.UTF8.GetBytes((string) Argument, StrSpan) > Integral)
+					throw new ArgumentException($"Cannot write '{Argument}' into only {Integral} UTF-8 bytes.");
 				Data.Write(StrSpan);
 			} else {
 				byte[] LargeStr = new byte[Integral];
-				Encoding.UTF8.GetBytes((string) Argument, LargeStr);
+				if (Encoding.UTF8.GetBytes((string) Argument, LargeStr) > Integral)
+					throw new ArgumentException($"Cannot write '{Argument}' into only {Integral} UTF-8 bytes.");
 				Data.Write(LargeStr);
 			}
 			break;
@@ -265,6 +270,23 @@ public static class LuaPack {
 	}
 
 	/**
+	<summary>Packs the given boxed arguments according to the given format into the given Stream.</summary>
+	<returns>The same Stream.</returns>
+	*/
+	[MethodImpl(MethodImplOptions.AggressiveInlining)]
+	public static Stream PackToStream(Stream Data, string Format, params object[] Arguments)
+	=> PackToStream(Format, Data, Arguments);
+
+	/**
+	<summary>Packs the given unboxed arguments according to the given format into the given Stream.</summary>
+	<remarks>This method has a limited set of options: s, c are not supported; f, d are rounded down.</remarks>
+	<returns>The same Stream.</returns>
+	*/
+	[MethodImpl(MethodImplOptions.AggressiveInlining)]
+	public static Stream PackToStream(Stream Data, string Format, params ulong[] Arguments)
+	=> PackToStream(Format, Data, Arguments);
+
+	/**
 	<summary>Packs the given boxed arguments according to the given format.</summary>
 	<returns>The MemoryStream with unreset(non-0) position containing the packed data.</returns>
 	*/
@@ -361,9 +383,16 @@ public static class LuaPack {
 			Output.Add(Encoding.UTF8.GetString(Str));
 			break;
 			case 2:
-			byte[] Fixed = new byte[Integral];
-			Data.Read(Fixed);
-			Output.Add(Encoding.UTF8.GetString(Fixed));
+			if (Integral < 256) {
+				Span<byte> Fixed = stackalloc byte[Integral];
+				Data.Read(Fixed);
+				Output.Add(Encoding.UTF8.GetString(Fixed));
+
+			} else {
+				byte[] Fixed = new byte[Integral];
+				Data.Read(Fixed);
+				Output.Add(Encoding.UTF8.GetString(Fixed));
+			}
 			break;
 		}
 	}
@@ -380,12 +409,12 @@ public static class LuaPack {
 	}
 	#endregion Reading
 
+	#region Unpacking
 	/**
 	<summary>Unpacks data in the given Stream according to the given format.</summary>
-	<remarks>No exception will be thrown if the Stream ends prematurely, and the unfinished entries will be 0 or empty strings.</remarks>
+	<remarks>No exception will be thrown if the Stream ends prematurely, and the unfinished entries will be undefined.</remarks>
 	<returns>The List containing boxed entries.</returns>
 	*/
-	#region Unpacking
 	public static List<object> Unpack(string Format, Stream Data) {
 		List<object> Output = new();
 
@@ -486,7 +515,7 @@ public static class LuaPack {
 
 	/**
 	<summary>Unpacks data in the given Stream according to the given format.</summary>
-	<remarks>This method has a limited set of options: s, c are not supported; f, d are rounded down.<br/>No exception will be thrown if the Stream ends prematurely, and the unfinished entries will be 0 or empty strings.</remarks>
+	<remarks>This method has a limited set of options: s, c are not supported; f, d are rounded down.<br/>No exception will be thrown if the Stream ends prematurely, and the unfinished entries will be undefined.</remarks>
 	<returns>The List containing unboxed entries.</returns>
 	*/
 	public static List<ulong> UnpackUnboxed(string Format, Stream Data) {
@@ -579,7 +608,7 @@ public static class LuaPack {
 
 	/**
 	<summary>Unpacks data in the given byte array according to the given format.</summary>
-	<remarks>No exception will be thrown if the byte array ends prematurely, and the unfinished entries will be 0 or empty strings.</remarks>
+	<remarks>No exception will be thrown if the byte array ends prematurely, and the unfinished entries will be undefined.</remarks>
 	<returns>The List containing boxed entries.</returns>
 	*/
 	[MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -590,7 +619,7 @@ public static class LuaPack {
 
 	/**
 	<summary>Unpacks data in the given byte array according to the given format.</summary>
-	<remarks>This method has a limited set of options: s, c are not supported; f, d are rounded down.<br/>No exception will be thrown if the byte array ends prematurely, and the unfinished entries will be 0 or empty strings.</remarks>
+	<remarks>This method has a limited set of options: s, c are not supported; f, d are rounded down.<br/>No exception will be thrown if the byte array ends prematurely, and the unfinished entries will be undefined.</remarks>
 	<returns>The List containing unboxed entries.</returns>
 	*/
 	[MethodImpl(MethodImplOptions.AggressiveInlining)]
