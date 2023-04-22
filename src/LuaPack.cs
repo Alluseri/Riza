@@ -51,7 +51,7 @@ public static class LuaPack {
 			if (Count > 0)
 				throw new FormatException($"The '{Operation switch { 0 => "i/I", 1 => "s", 2 => "c" }}' option requires a non-zero integral to be specified.");
 			if (Operation == 2)
-				throw new FormatException($"The 'c' option requires a non-optional non-zero integral to be specified.");
+				return;
 			Integral = sizeof(uint);
 		}
 
@@ -65,18 +65,10 @@ public static class LuaPack {
 			Data.Write(Str);
 			break;
 			case 2:
-			if (Integral < 256) {
-				Span<byte> StrSpan = stackalloc byte[Integral];
-				StrSpan.Clear();
-				if (Encoding.UTF8.GetBytes((string) Argument, StrSpan) > Integral)
-					throw new ArgumentException($"Cannot write '{Argument}' into only {Integral} UTF-8 bytes.");
-				Data.Write(StrSpan);
-			} else {
-				byte[] LargeStr = new byte[Integral];
-				if (Encoding.UTF8.GetBytes((string) Argument, LargeStr) > Integral)
-					throw new ArgumentException($"Cannot write '{Argument}' into only {Integral} UTF-8 bytes.");
-				Data.Write(LargeStr);
-			}
+			byte[] LargeStr = new byte[Integral];
+			if (Encoding.UTF8.GetBytes((string) Argument, LargeStr) > Integral)
+				throw new ArgumentException($"Cannot write '{Argument}' into only {Integral} UTF-8 bytes.");
+			Data.Write(LargeStr);
 			break;
 		}
 	}
@@ -368,8 +360,10 @@ public static class LuaPack {
 		if (Integral == 0) {
 			if (Count > 0)
 				throw new FormatException($"The '{Operation switch { 0 => 'I', 1 => 's', 2 => 'c', 3 => 'i' }}' option requires a non-zero integral to be specified.");
-			if (Operation == 2)
-				throw new FormatException($"The 'c' option requires a non-optional non-zero integral to be specified.");
+			if (Operation == 2) {
+				Output.Add("");
+				return;
+			}
 			Integral = sizeof(uint);
 		}
 
@@ -383,16 +377,9 @@ public static class LuaPack {
 			Output.Add(Encoding.UTF8.GetString(Str));
 			break;
 			case 2:
-			if (Integral < 256) {
-				Span<byte> Fixed = stackalloc byte[Integral];
-				Data.Read(Fixed);
-				Output.Add(Encoding.UTF8.GetString(Fixed));
-
-			} else {
-				byte[] Fixed = new byte[Integral];
-				Data.Read(Fixed);
-				Output.Add(Encoding.UTF8.GetString(Fixed));
-			}
+			byte[] Fixed = new byte[Integral];
+			Data.Read(Fixed);
+			Output.Add(Encoding.UTF8.GetString(Fixed));
 			break;
 		}
 	}

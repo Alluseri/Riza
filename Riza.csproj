@@ -9,7 +9,7 @@
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
 
     <PackageId>Alluseri.Riza</PackageId>
-    <Version>1.0.2</Version>
+    <Version>1.0.3</Version>
     <Authors>Alluseri</Authors>
     <Company>Catgirls Incorporated</Company>
   </PropertyGroup>
