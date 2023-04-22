@@ -48,11 +48,16 @@ public static class LuaPack {
 	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	private static void WriteRecord(Stream Data, int Integral, byte Count, byte Operation, bool BigEndian, object Argument) {
 		if (Integral == 0) {
-			if (Count > 0)
-				throw new FormatException($"The '{Operation switch { 0 => "i/I", 1 => "s", 2 => "c" }}' option requires a non-zero integral to be specified.");
-			if (Operation == 2)
+			if (Operation == 2) {
+				if (Count == 0)
+					throw new FormatException($"The 'c' option requires a non-optional integral to be specified.");
+				// Write nothing, it's 0 bytes long
 				return;
-			Integral = sizeof(uint);
+			} else {
+				if (Count > 0)
+					throw new FormatException($"The '{Operation switch { 0 => "i/I", 1 => "s" }}' option requires a non-zero integral to be specified.");
+				Integral = sizeof(uint);
+			}
 		}
 
 		switch (Operation) {
@@ -358,13 +363,16 @@ public static class LuaPack {
 	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	private static void ReadRecord(List<object> Output, Stream Data, int Integral, byte Count, byte Operation, bool BigEndian) {
 		if (Integral == 0) {
-			if (Count > 0)
-				throw new FormatException($"The '{Operation switch { 0 => 'I', 1 => 's', 2 => 'c', 3 => 'i' }}' option requires a non-zero integral to be specified.");
 			if (Operation == 2) {
-				Output.Add("");
+				if (Count == 0)
+					throw new FormatException($"The 'c' option requires a non-optional integral to be specified.");
+				Output.Add(""); // Just write a "", because you'll read nothing.
 				return;
+			} else {
+				if (Count > 0)
+					throw new FormatException($"The '{Operation switch { 0 => "i/I", 1 => "s" }}' option requires a non-zero integral to be specified.");
+				Integral = sizeof(uint);
 			}
-			Integral = sizeof(uint);
 		}
 
 		switch (Operation) {
