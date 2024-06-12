@@ -2,19 +2,22 @@
 
   <PropertyGroup>
     <OutputType>Library</OutputType>
-    <TargetFramework>net6.0</TargetFramework>
+    <!-- <OutputType>Exe</OutputType> -->
+    <TargetFramework>net8.0</TargetFramework>
     <Nullable>enable</Nullable>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
 
     <PackageId>Alluseri.Riza</PackageId>
-    <Version>1.0.4</Version>
+    <Version>2.0.0</Version>
     <Authors>Alluseri</Authors>
-    <Company>Catgirls Incorporated</Company>
+    <Company>lunahook.dev ltd.</Company>
   </PropertyGroup>
 
   <ItemGroup>
+    <None Include="README.md" Pack="true" PackagePath="\"/>
     <Compile Remove="test\**" />
     <!-- <PackageReference Include="BenchmarkDotNet" Version="0.13.5" /> -->
   </ItemGroup>
