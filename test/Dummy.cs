@@ -21,6 +21,7 @@ public class SmallDummy {
 	[RizaField(7)]
 	public double Field12;
 }
+
 public class LargeDummy {
 	public static readonly string Pattern = ">bfB<i4Hs>c12I3l<Lhd";
 	[RizaField(0)]
@@ -48,6 +49,7 @@ public class LargeDummy {
 	[RizaField(11)]
 	public double Field12;
 }
+
 public class ExtraLargeDummy {
 	public static readonly string Pattern = ">bfB<i4Hs>c12I3l>Lhd<bfB>i4Hs<c12I3l>Lhd";
 	[RizaField(0)]

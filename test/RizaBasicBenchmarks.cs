@@ -6,7 +6,7 @@ using System.Text;
 
 namespace Alluseri.Riza;
 
-public class BenchmarkPack {
+public class RizaBasicBenchmarks {
 	private readonly sbyte Field1 = (sbyte) (Random.Shared.Next() & 0xFF);
 	private readonly float Field2 = Random.Shared.NextSingle();
 	private readonly byte Field3 = (byte) (Random.Shared.Next() & 0xFF);
@@ -36,7 +36,11 @@ public class BenchmarkPack {
 	private readonly LargeDummy L;
 	private readonly ExtraLargeDummy XL;
 
-	public BenchmarkPack() {
+	private readonly MemoryStream Small;
+	private readonly MemoryStream Large;
+	private readonly MemoryStream ExtraLarge;
+
+	public RizaBasicBenchmarks() {
 		S = new() {
 			Field11 = Field11,
 			Field12 = Field12,
@@ -87,23 +91,45 @@ public class BenchmarkPack {
 			Field23 = Field23,
 			Field24 = Field24
 		};
+
+		Small = new(LuaPack.Pack(SmallDummy.Pattern, S));
+		Large = new(LuaPack.Pack(LargeDummy.Pattern, L));
+		ExtraLarge = new(LuaPack.Pack(ExtraLargeDummy.Pattern, XL));
 	}
 
 	[Benchmark]
-	public byte[] ManualPackS() => LuaPack.Pack(SmallDummy.Pattern, Field2, Field3, Field4, Field6, Field7, Field9, Field11, Field12);
+	public byte[] VarargsPackS() => LuaPack.Pack(SmallDummy.Pattern, Field2, Field3, Field4, Field6, Field7, Field9, Field11, Field12);
 
 	[Benchmark]
-	public byte[] ManualPackL() => LuaPack.Pack(LargeDummy.Pattern, Field1, Field2, Field3, Field4, Field5, Field6, Field7, Field8, Field9, Field10, Field11, Field12);
+	public byte[] VarargsPackL() => LuaPack.Pack(LargeDummy.Pattern, Field1, Field2, Field3, Field4, Field5, Field6, Field7, Field8, Field9, Field10, Field11, Field12);
 
 	[Benchmark]
-	public byte[] ManualPackXL() => LuaPack.Pack(ExtraLargeDummy.Pattern, Field1, Field2, Field3, Field4, Field5, Field6, Field7, Field8, Field9, Field10, Field11, Field12, Field13, Field14, Field15, Field16, Field17, Field18, Field19, Field20, Field21, Field22, Field23, Field24);
+	public byte[] VarargsPackXL() => LuaPack.Pack(ExtraLargeDummy.Pattern, Field1, Field2, Field3, Field4, Field5, Field6, Field7, Field8, Field9, Field10, Field11, Field12, Field13, Field14, Field15, Field16, Field17, Field18, Field19, Field20, Field21, Field22, Field23, Field24);
 
 	[Benchmark]
-	public byte[] SerialPackS() => LuaPack.Pack(SmallDummy.Pattern, S);
+	public byte[] DynamicPackS() => LuaPack.Pack(SmallDummy.Pattern, S);
 
 	[Benchmark]
-	public byte[] SerialPackL() => LuaPack.Pack(LargeDummy.Pattern, L);
+	public byte[] DynamicPackL() => LuaPack.Pack(LargeDummy.Pattern, L);
 
 	[Benchmark]
-	public byte[] SerialPackXL() => LuaPack.Pack(ExtraLargeDummy.Pattern, XL);
+	public byte[] DynamicPackXL() => LuaPack.Pack(ExtraLargeDummy.Pattern, XL);
+
+	[Benchmark]
+	public SmallDummy UnpackS() {
+		Small.Position = 0;
+		return LuaPack.Unpack<SmallDummy>(SmallDummy.Pattern, Small);
+	}
+
+	[Benchmark]
+	public LargeDummy UnpackL() {
+		Large.Position = 0;
+		return LuaPack.Unpack<LargeDummy>(LargeDummy.Pattern, Large);
+	}
+
+	[Benchmark]
+	public ExtraLargeDummy UnpackXL() {
+		ExtraLarge.Position = 0;
+		return LuaPack.Unpack<ExtraLargeDummy>(ExtraLargeDummy.Pattern, ExtraLarge);
+	}
 }

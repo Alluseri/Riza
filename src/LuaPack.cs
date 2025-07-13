@@ -8,6 +8,8 @@ using System.Text;
 
 namespace Alluseri.Riza;
 
+// TODO: May use BigInteger because i/I can return >8 bytes of output
+
 /// <summary>The core component of Riza.</summary>
 public static partial class LuaPack {
 	#region Writing
@@ -95,14 +97,15 @@ public static partial class LuaPack {
 			WriteIntBytes(Data, BigEndian, Integral, Unbox.AsUlong(Helper.Read(Index)!));
 			break;
 			case 1:
-			byte[] Str = Encoding.UTF8.GetBytes(Helper.Read<string>(Index)!);
+			byte[] Str = Encoding.UTF8.GetBytes(Helper.Read<string>(Index) ?? throw new InvalidDataException($"Cannot pack a null string (at index {Index})."));
 			WriteIntBytes(Data, BigEndian, Integral, (ulong) Str.Length);
 			Data.Write(Str);
 			break;
 			case 2:
 			byte[] LargeStr = new byte[Integral];
-			if (Encoding.UTF8.GetBytes(Helper.Read<string>(Index)!, LargeStr) > Integral)
-				throw new ArgumentException($"Cannot write '{Helper.Read<string>(Index)}' into only {Integral} UTF-8 bytes."); // We don't really care about double-call here, since if that exception happens, it... happens.
+			string Subject = Helper.Read<string>(Index) ?? throw new InvalidDataException($"Cannot pack a null string (at index {Index}).");
+			if (Encoding.UTF8.GetBytes(Subject, LargeStr) > Integral)
+				throw new ArgumentException($"Cannot write '{Subject}' into only {Integral} UTF-8 bytes.");
 			Data.Write(LargeStr);
 			break;
 		}
@@ -149,7 +152,7 @@ public static partial class LuaPack {
 			case 2:
 			byte[] Fixed = new byte[Integral];
 			Data.Read(Fixed);
-			Output.Add(Encoding.UTF8.GetString(Fixed));
+			Output.Add(Encoding.UTF8.GetString(Fixed[..Data.Read(Fixed)]));
 			break;
 		}
 	}
@@ -180,8 +183,7 @@ public static partial class LuaPack {
 			break;
 			case 2:
 			byte[] Fixed = new byte[Integral];
-			Data.Read(Fixed);
-			Instance.Write(Index, Encoding.UTF8.GetString(Fixed));
+			Instance.Write(Index, Encoding.UTF8.GetString(Fixed[..Data.Read(Fixed)]));
 			break;
 		}
 	}

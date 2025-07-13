@@ -3,8 +3,6 @@ using System.Runtime.CompilerServices;
 
 namespace Alluseri.Riza;
 
-// TODO: Rewrite for pattern matching
-
 internal static class Unbox {
 	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	public static ulong AsUlong(object M) => M switch {
